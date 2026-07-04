@@ -1,0 +1,14 @@
+# Entornos y dependencias
+backend/venv/
+backend/__pycache__/
+backend/app/**/__pycache__/
+frontend/node_modules/
+frontend/dist/
+
+# Variables de entorno (NUNCA subir esto)
+backend/.env
+frontend/.env
+
+# Otros
+.DS_Store
+*.pyc
