@@ -116,6 +116,47 @@ def update_member_role(team_id: str, user_id: str, new_role: str) -> dict:
     )
     return result.data[0] if result.data else {}
 
+def count_team_members(team_id: str) -> int:
+    result = supabase.table("team_members").select("user_id", count="exact").eq("team_id", team_id).execute()
+    return result.count or 0
+
+
+def count_team_admins(team_id: str) -> int:
+    result = (
+        supabase.table("team_members")
+        .select("user_id", count="exact")
+        .eq("team_id", team_id)
+        .eq("role", "admin")
+        .execute()
+    )
+    return result.count or 0
+
+
+def leave_team(user_id: str) -> None:
+    supabase.table("team_members").delete().eq("user_id", user_id).execute()
+    
+def delete_team(team_id: str) -> None:
+    """
+    Elimina un equipo por completo. Las tablas projects/images/content_versions/
+    comments/team_members tienen ON DELETE CASCADE por team_id, así que se
+    limpian solas. Las imágenes en Storage no se borran por cascada de SQL,
+    así que las removemos aparte (best-effort, no bloquea el borrado si falla).
+    """
+    images = supabase.table("images").select("image_url").eq("team_id", team_id).execute()
+    filenames = []
+    for img in images.data:
+        url = img.get("image_url", "")
+        if IMAGES_BUCKET in url:
+            filenames.append(url.split(f"{IMAGES_BUCKET}/")[-1])
+
+    if filenames:
+        try:
+            supabase.storage.from_(IMAGES_BUCKET).remove(filenames)
+        except Exception:
+            pass
+
+    supabase.table("teams").delete().eq("id", team_id).execute()
+
 
 def save_image_record(team_id: str, user_id: str, prompt: str, style: str, image_url: str, flagged: bool) -> dict:
     result = supabase.table("images").insert({

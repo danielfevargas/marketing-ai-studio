@@ -11,7 +11,7 @@ const NAV_ITEMS = [
   { to: "/generar", label: "Generar imagen", icon: Image },
   { to: "/galeria", label: "Galería", icon: LayoutGrid },
   { to: "/proyecto", label: "Editor de contenido", icon: PenSquare },
-  { to: "/equipo", label: "Equipo", icon: Users, adminOnly: true },
+  { to: "/equipo", label: "Equipo", icon: Users },
 ];
 
 export default function Sidebar() {

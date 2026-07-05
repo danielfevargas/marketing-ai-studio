@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { Users, AlertCircle, ShieldCheck, Copy, Check } from "lucide-react";
+import { Users, AlertCircle, ShieldCheck, Copy, Check, LogOut, Loader2, Trash2 } from "lucide-react";
 import { api } from "../lib/api";
 import { useAuth } from "../lib/AuthContext";
 
@@ -13,12 +13,15 @@ const ROLE_STYLES = {
 };
 
 export default function Team() {
-  const { team } = useAuth();
+  const { team, role, refreshTeam } = useAuth();
+  const isAdmin = role === "admin";
   const [members, setMembers] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [savingId, setSavingId] = useState(null);
   const [copied, setCopied] = useState(false);
+  const [leaving, setLeaving] = useState(false);
+  const [deleting, setDeleting] = useState(false);
 
   useEffect(() => {
     load();
@@ -55,6 +58,37 @@ export default function Team() {
     setTimeout(() => setCopied(false), 1800);
   }
 
+  async function handleLeave() {
+    if (!confirm(`¿Seguro que quieres salir de "${team?.name}"? Podrás crear o unirte a otro equipo después.`)) {
+      return;
+    }
+    setLeaving(true);
+    try {
+      await api.leaveTeam();
+      await refreshTeam();
+    } catch (e) {
+      alert(e.message);
+      setLeaving(false);
+    }
+  }
+
+  async function handleDelete() {
+    const confirmed = confirm(
+      `⚠️ Esto elimina el equipo "${team?.name}" PARA SIEMPRE: todos sus proyectos, imágenes, ` +
+      `comentarios y miembros se pierden. Esta acción no se puede deshacer.\n\n¿Continuar?`
+    );
+    if (!confirmed) return;
+
+    setDeleting(true);
+    try {
+      await api.deleteTeam();
+      await refreshTeam();
+    } catch (e) {
+      alert(e.message);
+      setDeleting(false);
+    }
+  }
+
   return (
     <div className="main">
       <div className="page-header">
@@ -64,6 +98,23 @@ export default function Team() {
           <p className="page-subtitle">
             Todas las personas con acceso a este equipo, y el rol que determina qué pueden hacer.
           </p>
+        </div>
+        <div style={{ display: "flex", gap: 8 }}>
+          <button className="btn btn-ghost btn-sm" onClick={handleLeave} disabled={leaving}>
+            {leaving ? <Loader2 size={13} className="spin" /> : <LogOut size={13} />}
+            Salir del equipo
+          </button>
+          {isAdmin && (
+            <button
+              className="btn btn-sm"
+              style={{ background: "var(--danger-soft)", color: "var(--danger)" }}
+              onClick={handleDelete}
+              disabled={deleting}
+            >
+              {deleting ? <Loader2 size={13} className="spin" /> : <Trash2 size={13} />}
+              Eliminar equipo
+            </button>
+          )}
         </div>
       </div>
 
@@ -113,16 +164,18 @@ export default function Team() {
                   </span>
                 </div>
                 <div style={{ marginTop: 12 }}>
-                  <select
-                    value={m.role}
-                    disabled={savingId === m.id}
-                    onChange={(e) => handleRoleChange(m.id, e.target.value)}
-                    style={{ width: "100%", padding: "7px 10px", fontSize: 12.5 }}
-                  >
-                    {ROLES.map((r) => (
-                      <option key={r} value={r}>{r}</option>
-                    ))}
-                  </select>
+                  {isAdmin ? (
+                    <select
+                      value={m.role}
+                      disabled={savingId === m.id}
+                      onChange={(e) => handleRoleChange(m.id, e.target.value)}
+                      style={{ width: "100%", padding: "7px 10px", fontSize: 12.5 }}
+                    >
+                      {ROLES.map((r) => (
+                        <option key={r} value={r}>{r}</option>
+                      ))}
+                    </select>
+                  ) : null}
                 </div>
               </div>
             );

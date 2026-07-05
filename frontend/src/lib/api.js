@@ -144,4 +144,20 @@ export const api = {
     });
     return handle(res);
   },
+
+  async leaveTeam() {
+    const res = await fetch(`${API_URL}/api/teams/leave`, {
+      method: "POST",
+      headers: await authHeader(),
+    });
+    return handle(res);
+  },
+
+  async deleteTeam() {
+    const res = await fetch(`${API_URL}/api/teams`, {
+      method: "DELETE",
+      headers: await authHeader(),
+    });
+    return handle(res);
+  },
 };

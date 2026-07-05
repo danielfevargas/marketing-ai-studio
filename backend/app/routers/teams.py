@@ -49,7 +49,7 @@ async def join_team(body: JoinTeamRequest, user: dict = Depends(get_current_user
 
 
 @router.get("/members")
-async def get_members(user: dict = Depends(require_permission("manage_team"))):
+async def get_members(user: dict = Depends(require_team)):
     members = supabase_service.get_team_members(user["team_id"])
     return {"members": members}
 
@@ -71,3 +71,23 @@ async def update_member_role(
         raise HTTPException(status_code=400, detail=f"Rol inválido. Usa uno de: {VALID_ROLES}")
     updated = supabase_service.update_member_role(user["team_id"], user_id, body.role)
     return {"member": updated}
+
+@router.post("/leave")
+async def leave_team(user: dict = Depends(require_team)):
+    total_members = supabase_service.count_team_members(user["team_id"])
+    total_admins = supabase_service.count_team_admins(user["team_id"])
+
+    if user["role"] == "admin" and total_admins <= 1 and total_members > 1:
+        raise HTTPException(
+            status_code=400,
+            detail="Eres el único admin de este equipo. Asigna el rol admin a otro integrante antes de salir.",
+        )
+
+    supabase_service.leave_team(user["id"])
+    return {"left": True}
+
+@router.delete("")
+async def delete_team(user: dict = Depends(require_permission("manage_team"))):
+    """Elimina el equipo completo (proyectos, imágenes, comentarios, integrantes). Solo admin."""
+    supabase_service.delete_team(user["team_id"])
+    return {"deleted": True}
