@@ -2,15 +2,11 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
 from app.config import settings
-from app.routers import images, content, collaboration, users, projects
+from app.routers import images, content, collaboration, projects, teams
 
 app = FastAPI(
     title="Marketing AI Studio API",
-    description=(
-        "API para generación de imágenes y edición de contenido con IA generativa. "
-        "Prototipo con herramientas gratuitas (Hugging Face + Groq + Supabase); "
-        "arquitectura equivalente documentada para Amazon Bedrock."
-    ),
+    description="API para generación de imágenes y edición de contenido con IA generativa, organizada por equipos.",
     version="1.0.0",
 )
 
@@ -25,8 +21,8 @@ app.add_middleware(
 app.include_router(images.router)
 app.include_router(content.router)
 app.include_router(collaboration.router)
-app.include_router(users.router)
 app.include_router(projects.router)
+app.include_router(teams.router)
 
 
 @app.get("/")

@@ -8,10 +8,16 @@ from app.services.moderation_service import moderate_text
 router = APIRouter(prefix="/api/content", tags=["content"])
 
 
+def _ensure_project_in_team(project_id: str, team_id: str):
+    project_team = supabase_service.get_project_team_id(project_id)
+    if project_team != team_id:
+        raise HTTPException(status_code=404, detail="Proyecto no encontrado en tu equipo.")
+
+
 class EditContentRequest(BaseModel):
     project_id: str
     text: str
-    operation: str  # resumir | expandir | corregir | variacion
+    operation: str
 
 
 @router.post("/edit")
@@ -19,6 +25,8 @@ async def edit_content(
     body: EditContentRequest,
     user: dict = Depends(require_permission("edit_content")),
 ):
+    _ensure_project_in_team(body.project_id, user["team_id"])
+
     moderation = moderate_text(body.text)
     if not moderation.allowed:
         raise HTTPException(status_code=400, detail=moderation.reason)
@@ -32,6 +40,7 @@ async def edit_content(
         raise HTTPException(status_code=502, detail=f"Error al procesar el texto: {e}")
 
     version = supabase_service.save_content_version(
+        team_id=user["team_id"],
         project_id=body.project_id,
         user_id=user["id"],
         content=result_text,
@@ -43,6 +52,7 @@ async def edit_content(
 
 @router.get("/history/{project_id}")
 async def get_history(project_id: str, user: dict = Depends(require_permission("comment"))):
+    _ensure_project_in_team(project_id, user["team_id"])
     history = supabase_service.get_content_history(project_id)
     return {"history": history}
 
@@ -58,17 +68,16 @@ async def revert_version(
     body: RevertRequest,
     user: dict = Depends(require_permission("edit_content")),
 ):
-    """
-    Revertir no borra historial: crea una NUEVA versión con el contenido
-    de una versión anterior. Así el historial completo queda trazable.
-    """
+    _ensure_project_in_team(body.project_id, user["team_id"])
     version = supabase_service.save_content_version(
+        team_id=user["team_id"],
         project_id=body.project_id,
         user_id=user["id"],
         content=body.content,
         operation="revertido",
     )
     return {"version": version}
+
 
 @router.patch("/versions/{version_id}/approve")
 async def approve_version(version_id: str, user: dict = Depends(require_permission("approve_content"))):

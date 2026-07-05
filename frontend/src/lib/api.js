@@ -104,20 +104,44 @@ export const api = {
     return handle(res);
   },
 
-  async getUsers() {
-    const res = await fetch(`${API_URL}/api/users`, {
+  async getMyTeam() {
+    const res = await fetch(`${API_URL}/api/teams/me`, {
       headers: await authHeader(),
     });
     return handle(res);
   },
 
-  async updateUserRole(userId, role) {
-    const res = await fetch(`${API_URL}/api/users/${userId}/role`, {
+  async createTeam(name) {
+    const res = await fetch(`${API_URL}/api/teams/create`, {
+      method: "POST",
+      headers: await authHeader(),
+      body: JSON.stringify({ name }),
+    });
+    return handle(res);
+  },
+
+  async joinTeam(inviteCode) {
+    const res = await fetch(`${API_URL}/api/teams/join`, {
+      method: "POST",
+      headers: await authHeader(),
+      body: JSON.stringify({ invite_code: inviteCode }),
+    });
+    return handle(res);
+  },
+
+  async getTeamMembers() {
+    const res = await fetch(`${API_URL}/api/teams/members`, {
+      headers: await authHeader(),
+    });
+    return handle(res);
+  },
+
+  async updateMemberRole(userId, role) {
+    const res = await fetch(`${API_URL}/api/teams/members/${userId}/role`, {
       method: "PATCH",
       headers: await authHeader(),
       body: JSON.stringify({ role }),
     });
     return handle(res);
   },
-
 };

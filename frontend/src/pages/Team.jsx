@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
-import { Users, AlertCircle, ShieldCheck } from "lucide-react";
+import { Users, AlertCircle, ShieldCheck, Copy, Check } from "lucide-react";
 import { api } from "../lib/api";
+import { useAuth } from "../lib/AuthContext";
 
 const ROLES = ["designer", "writer", "approver", "admin"];
 
@@ -12,10 +13,12 @@ const ROLE_STYLES = {
 };
 
 export default function Team() {
-  const [users, setUsers] = useState([]);
+  const { team } = useAuth();
+  const [members, setMembers] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [savingId, setSavingId] = useState(null);
+  const [copied, setCopied] = useState(false);
 
   useEffect(() => {
     load();
@@ -25,8 +28,8 @@ export default function Team() {
     setLoading(true);
     setError("");
     try {
-      const { users } = await api.getUsers();
-      setUsers(users);
+      const { members } = await api.getTeamMembers();
+      setMembers(members);
     } catch (e) {
       setError(e.message);
     } finally {
@@ -37,8 +40,8 @@ export default function Team() {
   async function handleRoleChange(userId, newRole) {
     setSavingId(userId);
     try {
-      await api.updateUserRole(userId, newRole);
-      setUsers((prev) => prev.map((u) => (u.id === userId ? { ...u, role: newRole } : u)));
+      await api.updateMemberRole(userId, newRole);
+      setMembers((prev) => prev.map((m) => (m.id === userId ? { ...m, role: newRole } : m)));
     } catch (e) {
       alert(e.message);
     } finally {
@@ -46,18 +49,45 @@ export default function Team() {
     }
   }
 
+  function copyInviteCode() {
+    navigator.clipboard.writeText(team.invite_code);
+    setCopied(true);
+    setTimeout(() => setCopied(false), 1800);
+  }
+
   return (
     <div className="main">
       <div className="page-header">
         <div>
-          <p className="eyebrow"><Users size={12} /> Administración</p>
+          <p className="eyebrow"><Users size={12} /> {team?.name}</p>
           <h1 className="page-title">Equipo</h1>
           <p className="page-subtitle">
-            Todas las personas con acceso a Studio, y el rol que determina qué pueden hacer.
-            Solo cuentas con rol "admin" pueden gestionar esto.
+            Todas las personas con acceso a este equipo, y el rol que determina qué pueden hacer.
           </p>
         </div>
       </div>
+
+      {team?.invite_code && (
+        <div className="card" style={{ marginBottom: 24, display: "flex", alignItems: "center", justifyContent: "space-between", gap: 16, flexWrap: "wrap" }}>
+          <div>
+            <p className="card-title" style={{ marginBottom: 4 }}>Código de invitación</p>
+            <p style={{ fontSize: 13, color: "var(--text-muted)" }}>
+              Comparte este código con tu equipo para que se unan. Entran con rol "writer" por defecto.
+            </p>
+          </div>
+          <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+            <span style={{
+              fontFamily: "var(--font-mono)", fontSize: 20, fontWeight: 700, letterSpacing: "0.1em",
+              background: "var(--surface-3)", padding: "8px 16px", borderRadius: 8, color: "var(--accent)",
+            }}>
+              {team.invite_code}
+            </span>
+            <button className="btn btn-ghost btn-sm" onClick={copyInviteCode}>
+              {copied ? <Check size={14} /> : <Copy size={14} />} {copied ? "Copiado" : "Copiar"}
+            </button>
+          </div>
+        </div>
+      )}
 
       {error && <div className="alert alert-danger"><AlertCircle size={16} />{error}</div>}
 
@@ -69,14 +99,14 @@ export default function Team() {
 
       {!loading && (
         <div className="team-grid">
-          {users.map((u) => {
-            const roleStyle = ROLE_STYLES[u.role] || ROLE_STYLES.writer;
-            const initials = (u.full_name || u.email || "??").slice(0, 2).toUpperCase();
+          {members.map((m) => {
+            const roleStyle = ROLE_STYLES[m.role] || ROLE_STYLES.writer;
+            const initials = (m.full_name || m.email || "??").slice(0, 2).toUpperCase();
             return (
-              <div className="team-card" key={u.id}>
+              <div className="team-card" key={m.id}>
                 <div className="team-card-avatar" style={{ background: roleStyle.bg }}>{initials}</div>
-                <div className="team-card-name">{u.full_name || "Sin nombre"}</div>
-                <div className="team-card-email">{u.email}</div>
+                <div className="team-card-name">{m.full_name || "Sin nombre"}</div>
+                <div className="team-card-email">{m.email}</div>
                 <div className="flex-between">
                   <span className="team-role-pill" style={{ background: `${roleStyle.bg}22`, color: roleStyle.bg }}>
                     <ShieldCheck size={11} /> {roleStyle.label}
@@ -84,9 +114,9 @@ export default function Team() {
                 </div>
                 <div style={{ marginTop: 12 }}>
                   <select
-                    value={u.role}
-                    disabled={savingId === u.id}
-                    onChange={(e) => handleRoleChange(u.id, e.target.value)}
+                    value={m.role}
+                    disabled={savingId === m.id}
+                    onChange={(e) => handleRoleChange(m.id, e.target.value)}
                     style={{ width: "100%", padding: "7px 10px", fontSize: 12.5 }}
                   >
                     {ROLES.map((r) => (

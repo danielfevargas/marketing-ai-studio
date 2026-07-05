@@ -1,25 +1,26 @@
 import { createContext, useContext, useEffect, useState } from "react";
 import { supabase } from "./supabaseClient";
+import { api } from "./api";
 
 const AuthContext = createContext(null);
 
 export function AuthProvider({ children }) {
   const [session, setSession] = useState(null);
-  const [role, setRole] = useState(null);
+  const [team, setTeam] = useState(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     supabase.auth.getSession().then(({ data }) => {
       setSession(data.session);
-      if (data.session) fetchRole(data.session.user.id);
+      if (data.session) fetchTeam();
       else setLoading(false);
     });
 
     const { data: listener } = supabase.auth.onAuthStateChange((_event, newSession) => {
       setSession(newSession);
-      if (newSession) fetchRole(newSession.user.id);
+      if (newSession) fetchTeam();
       else {
-        setRole(null);
+        setTeam(null);
         setLoading(false);
       }
     });
@@ -27,10 +28,15 @@ export function AuthProvider({ children }) {
     return () => listener.subscription.unsubscribe();
   }, []);
 
-  async function fetchRole(userId) {
-    const { data } = await supabase.from("profiles").select("role").eq("id", userId).single();
-    setRole(data?.role || "writer");
-    setLoading(false);
+  async function fetchTeam() {
+    try {
+      const { team } = await api.getMyTeam();
+      setTeam(team);
+    } catch {
+      setTeam(null);
+    } finally {
+      setLoading(false);
+    }
   }
 
   async function signIn(email, password) {
@@ -50,7 +56,18 @@ export function AuthProvider({ children }) {
   }
 
   return (
-    <AuthContext.Provider value={{ session, role, loading, signIn, signUp, signOut }}>
+    <AuthContext.Provider
+      value={{
+        session,
+        team,
+        role: team?.role || null,
+        loading,
+        signIn,
+        signUp,
+        signOut,
+        refreshTeam: fetchTeam,
+      }}
+    >
       {children}
     </AuthContext.Provider>
   );

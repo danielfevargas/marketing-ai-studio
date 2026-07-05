@@ -9,7 +9,7 @@ router = APIRouter(prefix="/api/projects", tags=["projects"])
 
 @router.get("")
 async def list_projects(user: dict = Depends(require_permission("comment"))):
-    projects = supabase_service.list_projects()
+    projects = supabase_service.list_projects(user["team_id"])
     return {"projects": projects}
 
 
@@ -22,5 +22,5 @@ async def create_project(
     body: CreateProjectRequest,
     user: dict = Depends(require_permission("comment")),
 ):
-    project = supabase_service.create_project(body.name, user["id"])
+    project = supabase_service.create_project(body.name, user["id"], user["team_id"])
     return {"project": project}

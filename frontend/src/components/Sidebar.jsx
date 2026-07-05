@@ -15,7 +15,7 @@ const NAV_ITEMS = [
 ];
 
 export default function Sidebar() {
-  const { session, role, signOut } = useAuth();
+  const { session, team, role, signOut } = useAuth();
   const [collapsed, setCollapsed] = useState(() => localStorage.getItem("studio_sidebar_collapsed") === "1");
 
   function toggle() {
@@ -35,7 +35,7 @@ export default function Sidebar() {
           </div>
           <div className="sidebar-brand-text">
             Studio
-            <span>Generación con IA</span>
+            <span>{team?.name || "Generación con IA"}</span>
           </div>
         </div>
         <button className="collapse-toggle" onClick={toggle} title={collapsed ? "Expandir" : "Colapsar"}>
