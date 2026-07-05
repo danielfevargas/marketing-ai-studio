@@ -1,5 +1,9 @@
+import { useState } from "react";
 import { NavLink } from "react-router-dom";
-import { LayoutDashboard, Image, LayoutGrid, PenSquare, Users, LogOut, Sparkles } from "lucide-react";
+import {
+  LayoutDashboard, Image, LayoutGrid, PenSquare, Users, LogOut,
+  Sparkles, PanelLeftClose, PanelLeftOpen,
+} from "lucide-react";
 import { useAuth } from "../lib/AuthContext";
 
 const NAV_ITEMS = [
@@ -7,23 +11,36 @@ const NAV_ITEMS = [
   { to: "/generar", label: "Generar imagen", icon: Image },
   { to: "/galeria", label: "Galería", icon: LayoutGrid },
   { to: "/proyecto", label: "Editor de contenido", icon: PenSquare },
-  { to: "/admin", label: "Usuarios y roles", icon: Users, adminOnly: true },
+  { to: "/equipo", label: "Equipo", icon: Users, adminOnly: true },
 ];
 
 export default function Sidebar() {
   const { session, role, signOut } = useAuth();
+  const [collapsed, setCollapsed] = useState(() => localStorage.getItem("studio_sidebar_collapsed") === "1");
+
+  function toggle() {
+    const next = !collapsed;
+    setCollapsed(next);
+    localStorage.setItem("studio_sidebar_collapsed", next ? "1" : "0");
+  }
+
   const initials = (session?.user?.email || "??").slice(0, 2).toUpperCase();
 
   return (
-    <aside className="sidebar">
-      <div className="sidebar-brand">
-        <div className="sidebar-brand-mark">
-          <Sparkles size={16} strokeWidth={2.5} />
+    <aside className={`sidebar ${collapsed ? "collapsed" : ""}`}>
+      <div className="sidebar-top">
+        <div className="sidebar-brand">
+          <div className="sidebar-brand-mark">
+            <Sparkles size={15} strokeWidth={2.5} />
+          </div>
+          <div className="sidebar-brand-text">
+            Studio
+            <span>Generación con IA</span>
+          </div>
         </div>
-        <div className="sidebar-brand-text">
-          Studio
-          <span>Generación con IA</span>
-        </div>
+        <button className="collapse-toggle" onClick={toggle} title={collapsed ? "Expandir" : "Colapsar"}>
+          {collapsed ? <PanelLeftOpen size={15} /> : <PanelLeftClose size={15} />}
+        </button>
       </div>
 
       <div className="nav-section-label">Espacio de trabajo</div>
@@ -35,9 +52,10 @@ export default function Sidebar() {
             to={item.to}
             end={item.end}
             className={({ isActive }) => `nav-item ${isActive ? "active" : ""}`}
+            title={collapsed ? item.label : undefined}
           >
             <Icon size={17} strokeWidth={2} />
-            {item.label}
+            <span>{item.label}</span>
           </NavLink>
         );
       })}
@@ -49,9 +67,11 @@ export default function Sidebar() {
             <div className="sidebar-user-email">{session?.user?.email}</div>
             <span className="role-badge">{role}</span>
           </div>
-          <button className="icon-btn-ghost" onClick={signOut} title="Cerrar sesión">
-            <LogOut size={16} />
-          </button>
+          {!collapsed && (
+            <button className="icon-btn-ghost" onClick={signOut} title="Cerrar sesión">
+              <LogOut size={15} />
+            </button>
+          )}
         </div>
       </div>
     </aside>

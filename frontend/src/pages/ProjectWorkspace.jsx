@@ -227,7 +227,7 @@ export default function ProjectWorkspace() {
                       <RotateCcw size={12} /> Restaurar
                     </button>
                     {canApprove && v.status !== "approved" && (
-                      <button className="btn btn-teal btn-sm" onClick={() => approveVersion(v)}>
+                      <button className="btn btn-success btn-sm" onClick={() => approveVersion(v)}>
                         <CheckCircle2 size={12} /> Aprobar
                       </button>
                     )}

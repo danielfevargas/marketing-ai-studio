@@ -79,7 +79,7 @@ export default function Gallery() {
                 {canApprove && img.status !== "approved" && (
                   <div style={{ marginTop: 7 }}>
                     <button
-                      className="btn btn-teal btn-sm"
+                      className="btn btn-success btn-sm"
                       style={{ padding: "4px 10px", fontSize: 11 }}
                       onClick={() => handleApprove(img.id)}
                     >

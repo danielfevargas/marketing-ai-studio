@@ -30,7 +30,6 @@ export default function Dashboard() {
   }
 
   const approvedCount = images.filter((i) => i.status === "approved").length;
-
   const canGenerate = role === "designer" || role === "admin";
   const canEdit = role === "writer" || role === "admin";
 
@@ -50,7 +49,7 @@ export default function Dashboard() {
       <div className="stat-grid">
         <div className="stat-card">
           <div className="stat-card-top">
-            <div className="stat-card-icon" style={{ background: "var(--ochre-soft)", color: "var(--ochre-deep)" }}>
+            <div className="stat-card-icon" style={{ background: "var(--accent-soft)", color: "var(--accent)" }}>
               <Image size={16} />
             </div>
           </div>
@@ -60,7 +59,7 @@ export default function Dashboard() {
 
         <div className="stat-card">
           <div className="stat-card-top">
-            <div className="stat-card-icon" style={{ background: "var(--teal-soft)", color: "var(--teal-deep)" }}>
+            <div className="stat-card-icon" style={{ background: "var(--success-soft)", color: "var(--success)" }}>
               <CheckCircle2 size={16} />
             </div>
           </div>
@@ -70,7 +69,7 @@ export default function Dashboard() {
 
         <div className="stat-card">
           <div className="stat-card-top">
-            <div className="stat-card-icon" style={{ background: "rgba(20,24,43,0.06)", color: "var(--ink)" }}>
+            <div className="stat-card-icon" style={{ background: "var(--surface-3)", color: "var(--text)" }}>
               <FolderKanban size={16} />
             </div>
           </div>
@@ -114,7 +113,7 @@ export default function Dashboard() {
         <div className="card">
           <div className="flex-between mt-6" style={{ marginBottom: 16 }}>
             <p className="card-title" style={{ margin: 0 }}>Imágenes recientes</p>
-            <Link to="/galeria" style={{ fontSize: 12.5, color: "var(--ochre-deep)", fontWeight: 600 }}>Ver todas →</Link>
+            <Link to="/galeria" style={{ fontSize: 12.5, color: "var(--accent)", fontWeight: 600 }}>Ver todas →</Link>
           </div>
           {loading && <div className="skeleton" style={{ height: 140 }} />}
           {!loading && images.length === 0 && (
@@ -127,7 +126,7 @@ export default function Dashboard() {
           {!loading && images.length > 0 && (
             <div style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: 6 }}>
               {images.slice(0, 8).map((img) => (
-                <div key={img.id} style={{ aspectRatio: 1, borderRadius: 6, overflow: "hidden", background: "var(--canvas-sunken)" }}>
+                <div key={img.id} style={{ aspectRatio: 1, borderRadius: 6, overflow: "hidden", background: "var(--surface-3)" }}>
                   <img src={img.image_url} alt={img.prompt} style={{ width: "100%", height: "100%", objectFit: "cover" }} />
                 </div>
               ))}
@@ -150,7 +149,7 @@ export default function Dashboard() {
               key={p.id}
               to="/proyecto"
               style={{
-                display: "block", padding: "10px 0", borderBottom: "1px solid var(--line-soft)",
+                display: "block", padding: "10px 0", borderBottom: "1px solid var(--border-soft)",
                 fontSize: 13.5, color: "var(--text)", fontWeight: 500,
               }}
             >

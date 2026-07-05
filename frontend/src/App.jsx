@@ -6,7 +6,7 @@ import Dashboard from "./pages/Dashboard";
 import GenerateImage from "./pages/GenerateImage";
 import Gallery from "./pages/Gallery";
 import ProjectWorkspace from "./pages/ProjectWorkspace";
-import Admin from "./pages/Admin";
+import Team from "./pages/Team";
 
 function ProtectedLayout({ children }) {
   const { session, loading } = useAuth();
@@ -30,7 +30,7 @@ export default function App() {
       <Route path="/generar" element={<ProtectedLayout><GenerateImage /></ProtectedLayout>} />
       <Route path="/galeria" element={<ProtectedLayout><Gallery /></ProtectedLayout>} />
       <Route path="/proyecto" element={<ProtectedLayout><ProjectWorkspace /></ProtectedLayout>} />
-      <Route path="/admin" element={<ProtectedLayout><Admin /></ProtectedLayout>} />
+      <Route path="/equipo" element={<ProtectedLayout><Team /></ProtectedLayout>} />
       <Route path="*" element={<Navigate to="/" replace />} />
     </Routes>
   );

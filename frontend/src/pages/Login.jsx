@@ -97,7 +97,7 @@ export default function Login() {
           <p style={{ marginTop: 20, fontSize: 13, color: "var(--text-muted)" }}>
             {mode === "signin" ? "¿No tienes cuenta? " : "¿Ya tienes cuenta? "}
             <a
-              style={{ color: "var(--ochre-deep)", fontWeight: 600, cursor: "pointer" }}
+              style={{ color: "var(--accent)", fontWeight: 600, cursor: "pointer" }}
               onClick={() => setMode(mode === "signin" ? "signup" : "signin")}
             >
               {mode === "signin" ? "Regístrate" : "Inicia sesión"}
@@ -106,7 +106,7 @@ export default function Login() {
           <p style={{ marginTop: 10, fontSize: 12, color: "var(--text-faint)", lineHeight: 1.5 }}>
             Nota: toda cuenta nueva se asigna por defecto al rol "writer" (puede editar
             contenido y comentar). Un administrador puede darte acceso a más funciones
-            desde "Usuarios y roles" dentro de la app.
+            desde "Equipo" dentro de la app.
           </p>
         </div>
       </div>
