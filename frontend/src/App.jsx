@@ -2,6 +2,7 @@ import { Navigate, Route, Routes } from "react-router-dom";
 import { useAuth } from "./lib/AuthContext";
 import Sidebar from "./components/Sidebar";
 import Login from "./pages/Login";
+import Dashboard from "./pages/Dashboard";
 import GenerateImage from "./pages/GenerateImage";
 import Gallery from "./pages/Gallery";
 import ProjectWorkspace from "./pages/ProjectWorkspace";
@@ -25,41 +26,12 @@ export default function App() {
   return (
     <Routes>
       <Route path="/login" element={<Login />} />
-      <Route
-        path="/generar"
-        element={
-          <ProtectedLayout>
-            <GenerateImage />
-          </ProtectedLayout>
-        }
-      />
-      <Route
-        path="/galeria"
-        element={
-          <ProtectedLayout>
-            <Gallery />
-          </ProtectedLayout>
-        }
-      />
-      <Route
-        path="/proyecto"
-        element={
-          <ProtectedLayout>
-            <ProjectWorkspace />
-          </ProtectedLayout>
-        }
-      />
-      <Route
-        path="/admin"
-        element={
-          <ProtectedLayout>
-            <Admin />
-          </ProtectedLayout>
-        }
-      />
-
-
-      <Route path="*" element={<Navigate to="/generar" replace />} />
+      <Route path="/" element={<ProtectedLayout><Dashboard /></ProtectedLayout>} />
+      <Route path="/generar" element={<ProtectedLayout><GenerateImage /></ProtectedLayout>} />
+      <Route path="/galeria" element={<ProtectedLayout><Gallery /></ProtectedLayout>} />
+      <Route path="/proyecto" element={<ProtectedLayout><ProjectWorkspace /></ProtectedLayout>} />
+      <Route path="/admin" element={<ProtectedLayout><Admin /></ProtectedLayout>} />
+      <Route path="*" element={<Navigate to="/" replace />} />
     </Routes>
   );
 }

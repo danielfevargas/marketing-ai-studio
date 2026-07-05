@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { Users, AlertCircle } from "lucide-react";
 import { api } from "../lib/api";
 
 const ROLES = ["designer", "writer", "approver", "admin"];
@@ -41,38 +42,40 @@ export default function Admin() {
   return (
     <div className="main">
       <div className="page-header">
-        <p className="eyebrow">Administración</p>
-        <h1 className="page-title">Usuarios y roles</h1>
-        <p className="page-subtitle">
-          Asigna el rol de cada persona del equipo. Solo cuentas con rol "admin" pueden ver
-          esta página.
-        </p>
+        <div>
+          <p className="eyebrow"><Users size={12} /> Administración</p>
+          <h1 className="page-title">Usuarios y roles</h1>
+          <p className="page-subtitle">
+            Asigna el rol de cada persona del equipo. Solo cuentas con rol "admin" pueden ver
+            esta página.
+          </p>
+        </div>
       </div>
 
-      {error && <div className="alert alert-danger">{error}</div>}
-      {loading && <p>Cargando…</p>}
+      {error && <div className="alert alert-danger"><AlertCircle size={16} />{error}</div>}
+      {loading && <div className="skeleton" style={{ height: 220 }} />}
 
       {!loading && (
         <div className="card" style={{ padding: 0, overflow: "hidden" }}>
-          <table style={{ width: "100%", borderCollapse: "collapse" }}>
+          <table className="data-table">
             <thead>
-              <tr style={{ background: "var(--canvas)", textAlign: "left" }}>
-                <th style={{ padding: "10px 16px", fontSize: 12, textTransform: "uppercase", color: "var(--text-muted)" }}>Correo</th>
-                <th style={{ padding: "10px 16px", fontSize: 12, textTransform: "uppercase", color: "var(--text-muted)" }}>Nombre</th>
-                <th style={{ padding: "10px 16px", fontSize: 12, textTransform: "uppercase", color: "var(--text-muted)" }}>Rol</th>
+              <tr>
+                <th>Correo</th>
+                <th>Nombre</th>
+                <th>Rol</th>
               </tr>
             </thead>
             <tbody>
               {users.map((u) => (
-                <tr key={u.id} style={{ borderTop: "1px solid var(--line)" }}>
-                  <td style={{ padding: "10px 16px", fontSize: 14 }}>{u.email}</td>
-                  <td style={{ padding: "10px 16px", fontSize: 14 }}>{u.full_name || "—"}</td>
-                  <td style={{ padding: "10px 16px" }}>
+                <tr key={u.id}>
+                  <td>{u.email}</td>
+                  <td>{u.full_name || "—"}</td>
+                  <td>
                     <select
                       value={u.role}
                       disabled={savingId === u.id}
                       onChange={(e) => handleRoleChange(u.id, e.target.value)}
-                      style={{ padding: "6px 10px", borderRadius: 3, border: "1px solid var(--line)" }}
+                      style={{ padding: "6px 10px", borderRadius: 6, border: "1.5px solid var(--line)" }}
                     >
                       {ROLES.map((r) => (
                         <option key={r} value={r}>{r}</option>

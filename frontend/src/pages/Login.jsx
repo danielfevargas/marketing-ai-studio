@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { Navigate } from "react-router-dom";
+import { Sparkles, Image, PenSquare, Users, AlertCircle, Loader2 } from "lucide-react";
 import { useAuth } from "../lib/AuthContext";
 
 export default function Login() {
@@ -33,54 +34,81 @@ export default function Login() {
     }
   }
 
-  // Ya hay sesión activa (login exitoso, o volviste con una sesión válida) -> sal de /login
-  if (session) return <Navigate to="/generar" replace />;
+  if (session) return <Navigate to="/" replace />;
 
   return (
     <div className="login-screen">
-      <div className="login-card">
-        <p className="eyebrow">Studio / IA</p>
-        <h1 className="page-title" style={{ fontSize: 22, marginBottom: 24 }}>
-          {mode === "signin" ? "Inicia sesión" : "Crea tu cuenta"}
-        </h1>
+      <div className="login-brand-panel">
+        <div className="sidebar-brand-mark" style={{ width: 40, height: 40 }}>
+          <Sparkles size={20} strokeWidth={2.5} />
+        </div>
+        <h2>Genera imágenes y contenido de campaña con IA, en equipo.</h2>
+        <p>
+          Una sola herramienta para diseñadores, redactores y aprobadores: generación de
+          imágenes, edición de texto, historial de versiones y flujo de aprobación.
+        </p>
+        <div className="login-feature-list">
+          <div className="login-feature">
+            <Image size={18} />
+            <span>Genera imágenes a partir de descripciones de texto, con distintos estilos.</span>
+          </div>
+          <div className="login-feature">
+            <PenSquare size={18} />
+            <span>Resume, expande y corrige contenido, sin perder ninguna versión anterior.</span>
+          </div>
+          <div className="login-feature">
+            <Users size={18} />
+            <span>Roles y permisos claros para todo el equipo creativo.</span>
+          </div>
+        </div>
+      </div>
 
-        {error && <div className="alert alert-danger">{error}</div>}
-        {info && <div className="alert alert-flagged">{info}</div>}
+      <div className="login-form-panel">
+        <div className="login-card">
+          <p className="eyebrow">Studio / IA</p>
+          <h1 className="page-title" style={{ fontSize: 24, marginBottom: 26 }}>
+            {mode === "signin" ? "Inicia sesión" : "Crea tu cuenta"}
+          </h1>
 
-        <form onSubmit={handleSubmit}>
-          {mode === "signup" && (
+          {error && <div className="alert alert-danger"><AlertCircle size={16} />{error}</div>}
+          {info && <div className="alert alert-flagged"><AlertCircle size={16} />{info}</div>}
+
+          <form onSubmit={handleSubmit}>
+            {mode === "signup" && (
+              <div className="field">
+                <label>Nombre completo</label>
+                <input value={fullName} onChange={(e) => setFullName(e.target.value)} required />
+              </div>
+            )}
             <div className="field">
-              <label>Nombre completo</label>
-              <input value={fullName} onChange={(e) => setFullName(e.target.value)} required />
+              <label>Correo</label>
+              <input type="email" value={email} onChange={(e) => setEmail(e.target.value)} required />
             </div>
-          )}
-          <div className="field">
-            <label>Correo</label>
-            <input type="email" value={email} onChange={(e) => setEmail(e.target.value)} required />
-          </div>
-          <div className="field">
-            <label>Contraseña</label>
-            <input type="password" value={password} onChange={(e) => setPassword(e.target.value)} required minLength={6} />
-          </div>
-          <button className="btn btn-primary" style={{ width: "100%" }} disabled={loading}>
-            {loading ? "Procesando..." : mode === "signin" ? "Entrar" : "Registrarme"}
-          </button>
-        </form>
+            <div className="field">
+              <label>Contraseña</label>
+              <input type="password" value={password} onChange={(e) => setPassword(e.target.value)} required minLength={6} />
+            </div>
+            <button className="btn btn-primary" style={{ width: "100%", padding: "11px 18px" }} disabled={loading}>
+              {loading && <Loader2 size={15} className="spin" />}
+              {loading ? "Procesando..." : mode === "signin" ? "Entrar" : "Registrarme"}
+            </button>
+          </form>
 
-        <p style={{ marginTop: 18, fontSize: 13, color: "var(--text-muted)" }}>
-          {mode === "signin" ? "¿No tienes cuenta? " : "¿Ya tienes cuenta? "}
-          <a
-            style={{ color: "var(--ochre)", fontWeight: 600, cursor: "pointer" }}
-            onClick={() => setMode(mode === "signin" ? "signup" : "signin")}
-          >
-            {mode === "signin" ? "Regístrate" : "Inicia sesión"}
-          </a>
-        </p>
-        <p style={{ marginTop: 8, fontSize: 12, color: "var(--text-muted)" }}>
-          Nota: toda cuenta nueva se asigna por defecto al rol "writer" (puede editar
-          contenido y comentar). Un administrador puede darte acceso a más funciones
-          (generar imágenes, aprobar contenido) desde "Usuarios y roles" dentro de la app.
-        </p>
+          <p style={{ marginTop: 20, fontSize: 13, color: "var(--text-muted)" }}>
+            {mode === "signin" ? "¿No tienes cuenta? " : "¿Ya tienes cuenta? "}
+            <a
+              style={{ color: "var(--ochre-deep)", fontWeight: 600, cursor: "pointer" }}
+              onClick={() => setMode(mode === "signin" ? "signup" : "signin")}
+            >
+              {mode === "signin" ? "Regístrate" : "Inicia sesión"}
+            </a>
+          </p>
+          <p style={{ marginTop: 10, fontSize: 12, color: "var(--text-faint)", lineHeight: 1.5 }}>
+            Nota: toda cuenta nueva se asigna por defecto al rol "writer" (puede editar
+            contenido y comentar). Un administrador puede darte acceso a más funciones
+            desde "Usuarios y roles" dentro de la app.
+          </p>
+        </div>
       </div>
     </div>
   );

@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { PenSquare, Plus, RotateCcw, CheckCircle2, AlertCircle, FolderKanban, Loader2 } from "lucide-react";
 import { api } from "../lib/api";
 import { useAuth } from "../lib/AuthContext";
 import Comments from "../components/Comments";
@@ -23,6 +24,7 @@ export default function ProjectWorkspace() {
   const [history, setHistory] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
+  const [initialLoading, setInitialLoading] = useState(true);
 
   useEffect(() => {
     loadProjects();
@@ -34,10 +36,12 @@ export default function ProjectWorkspace() {
       setProjects(projects);
       if (projects.length > 0 && !projectId) {
         setProjectId(projects[0].id);
-        loadHistory(projects[0].id);
+        await loadHistory(projects[0].id);
       }
     } catch (e) {
       setError(e.message);
+    } finally {
+      setInitialLoading(false);
     }
   }
 
@@ -117,12 +121,14 @@ export default function ProjectWorkspace() {
   return (
     <div className="main">
       <div className="page-header">
-        <p className="eyebrow">Proyecto activo</p>
-        <h1 className="page-title">{currentProject?.name || "Editor de contenido"}</h1>
-        <p className="page-subtitle">
-          Cada proyecto tiene su propio historial. Cambia de proyecto o crea uno nuevo para
-          empezar una campaña distinta sin mezclar versiones.
-        </p>
+        <div>
+          <p className="eyebrow"><PenSquare size={12} /> Proyecto activo</p>
+          <h1 className="page-title">{currentProject?.name || "Editor de contenido"}</h1>
+          <p className="page-subtitle">
+            Cada proyecto tiene su propio historial. Cambia de proyecto o crea uno nuevo para
+            empezar una campaña distinta sin mezclar versiones.
+          </p>
+        </div>
       </div>
 
       <div className="card" style={{ marginBottom: 24, display: "flex", gap: 16, alignItems: "flex-end", flexWrap: "wrap" }}>
@@ -141,17 +147,27 @@ export default function ProjectWorkspace() {
             placeholder="Nombre del nuevo proyecto"
             value={newProjectName}
             onChange={(e) => setNewProjectName(e.target.value)}
-            style={{ padding: "10px 12px", border: "1px solid var(--line)", borderRadius: "var(--radius)" }}
+            style={{ padding: "10px 13px", border: "1.5px solid var(--line)", borderRadius: "var(--radius-sm)" }}
           />
           <button className="btn btn-ghost btn-sm" disabled={creating}>
-            + Nuevo proyecto
+            <Plus size={14} /> Nuevo proyecto
           </button>
         </form>
       </div>
 
-      {!projectId ? (
-        <p style={{ color: "var(--text-muted)" }}>Crea un proyecto para empezar a editar contenido.</p>
-      ) : (
+      {initialLoading && <div className="skeleton" style={{ height: 240 }} />}
+
+      {!initialLoading && !projectId && (
+        <div className="card">
+          <div className="empty-state">
+            <div className="empty-state-icon"><FolderKanban size={20} /></div>
+            <div className="empty-state-title">Sin proyectos todavía</div>
+            <div className="empty-state-text">Crea uno arriba para empezar a editar contenido.</div>
+          </div>
+        </div>
+      )}
+
+      {!initialLoading && projectId && (
         <div style={{ display: "grid", gridTemplateColumns: "1.3fr 1fr", gap: 28 }}>
           <div>
             <div className="card">
@@ -173,12 +189,13 @@ export default function ProjectWorkspace() {
                     disabled={loading}
                     onClick={() => runOperation(op.id)}
                   >
+                    {loading ? <Loader2 size={13} className="spin" /> : null}
                     {op.label}
                   </button>
                 ))}
               </div>
 
-              {error && <div className="alert alert-danger" style={{ marginTop: 16 }}>{error}</div>}
+              {error && <div className="alert alert-danger" style={{ marginTop: 16 }}><AlertCircle size={16} />{error}</div>}
             </div>
 
             <div className="card" style={{ marginTop: 24 }}>
@@ -187,12 +204,10 @@ export default function ProjectWorkspace() {
           </div>
 
           <div>
-            <h3 style={{ fontFamily: "var(--font-display)", fontSize: 16, marginBottom: 16 }}>
-              Historial de versiones
-            </h3>
+            <p className="card-title" style={{ marginBottom: 16 }}>Historial de versiones</p>
             <div className="revision-strip">
               {history.length === 0 && (
-                <p style={{ color: "var(--text-muted)", fontSize: 14 }}>
+                <p style={{ color: "var(--text-muted)", fontSize: 13.5 }}>
                   Aún no hay versiones. Aplica una operación para crear la primera.
                 </p>
               )}
@@ -200,18 +215,20 @@ export default function ProjectWorkspace() {
                 <div className="revision-item" key={v.id}>
                   <div className="revision-meta">
                     v{v.version_number} · {v.operation}
-                    {v.operation === "revertido" && <span className="revision-stamp">Revertido</span>}
-                    {v.status === "approved" && <span className="revision-stamp">Aprobado</span>}
-                    <div>{new Date(v.created_at).toLocaleString("es-CO")}</div>
+                    {v.operation === "revertido" && <span className="revision-stamp"><RotateCcw size={9} />Revertido</span>}
+                    {v.status === "approved" && <span className="revision-stamp"><CheckCircle2 size={9} />Aprobado</span>}
+                  </div>
+                  <div style={{ fontFamily: "var(--font-mono)", fontSize: 11, color: "var(--text-faint)", marginBottom: 6 }}>
+                    {new Date(v.created_at).toLocaleString("es-CO")}
                   </div>
                   <div className="revision-content">{v.content.slice(0, 140)}{v.content.length > 140 ? "…" : ""}</div>
                   <div style={{ display: "flex", gap: 8, marginTop: 8 }}>
                     <button className="btn btn-ghost btn-sm" onClick={() => revertTo(v)}>
-                      Restaurar
+                      <RotateCcw size={12} /> Restaurar
                     </button>
                     {canApprove && v.status !== "approved" && (
-                      <button className="btn btn-primary btn-sm" onClick={() => approveVersion(v)}>
-                        Aprobar
+                      <button className="btn btn-teal btn-sm" onClick={() => approveVersion(v)}>
+                        <CheckCircle2 size={12} /> Aprobar
                       </button>
                     )}
                   </div>
